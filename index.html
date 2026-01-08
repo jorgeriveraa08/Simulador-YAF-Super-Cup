@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAF SUPERCUP 2026 | Live Telemetry</title>
+    <style>
+        :root {
+            --bg-color: #0b0e11;
+            --card-bg: #161a1e;
+            --accent: #87ceeb; /* Changed to light blue */
+            --text-main: #ffffff;
+            --text-dim: #909090;
+            --border: #2d333b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #87ceeb; /* Light blue background */
+            color: white;
+            width: 50px; /* Square dimensions */
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 0 10px #87ceeb, 0 0 20px #87ceeb; /* Neon glow */
+        }
+
+        h1 { 
+            margin: 0; 
+            letter-spacing: 2px; 
+            font-weight: 800; 
+            text-shadow: 0 0 10px var(--accent); /* Neon text shadow */
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 10px var(--accent); /* Added neon shadow */
+        }
+
+        .ronda-info {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px var(--accent);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #252a30;
+        }
+
+        .pos { font-weight: bold; width: 40px; }
+        .tag { color: var(--accent); font-weight: bold; width: 50px; }
+        .vr { color: #00ff41; font-family: monospace; }
+
+        .btn-simular {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .btn-simular:hover {
+            background: #ff1e1e;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        .standings-title {
+            font-size: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px var(--accent);
+        }
+
+        .medal { margin-right: 5px; }
+
+        .history-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .history-toggle {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px var(--accent);
+            transition: box-shadow 0.2s;
+        }
+
+        .history-toggle:hover {
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        .history-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 10px var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .history-title {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px var(--accent);
+        }
+
+        .stats-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .stats-toggle {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px var(--accent);
+            transition: box-shadow 0.2s;
+        }
+
+        .stats-toggle:hover {
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        .stats-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 10px var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .leader-highlight {
+            color: var(--accent);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--accent);
+        }
+
+        .sort-select {
+            margin-bottom: 10px;
+            padding: 5px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+        }
+
+        .events-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .events-toggle {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px var(--accent);
+            transition: box-shadow 0.2s;
+        }
+
+        .events-toggle:hover {
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        .events-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 10px var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .event-item {
+            margin-bottom: 10px;
+            padding: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .team-highlight {
+            color: var(--accent);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo">YSC</div>
+        <h1>YAF SUPERCUP 2026</h1>
+        <div id="sub-header" style="color: var(--text-dim);">SISTEMA DE CRONOMETRAJE OFICIAL</div>
+    </header>
+
+    <button class="btn-simular" onclick="simularSiguienteRonda()">SIMULAR SIGUIENTE RONDA</button>
+
+    <div class="dashboard">
+        <div class="card">
+            <div id="ronda-nombre" class="ronda-info">ESPERANDO INICIO...</div>
+            <table id="tabla-carrera">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>ID</th>
+                        <th>Piloto</th>
+                        <th>Gap</th>
+                        <th>Vuelta</th>
+                    </tr>
+                </thead>
+                <tbody id="body-carrera">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="standings-title">MUNDIAL DE PILOTOS</div>
+            <div id="leader-message" style="color: var(--accent); font-size: 0.9rem; margin-bottom: 10px;">¡Compite por la cima!</div>
+            <table id="tabla-mundial">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Piloto</th>
+                        <th>Pts</th>
+                    </tr>
+                </thead>
+                <tbody id="body-mundial">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="standings-title">MUNDIAL DE CONSTRUCTORES</div>
+            <div id="team-leader-message" style="color: var(--accent); font-size: 0.9rem; margin-bottom: 10px;">¡Equipos compitiendo!</div>
+            <table id="tabla-equipos">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Equipo</th>
+                        <th>Pts</th>
+                    </tr>
+                </thead>
+                <tbody id="body-equipos">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="history-toggle" onclick="toggleHistory()">VER HISTORIAL DE CARRERAS</button>
+
+    <div class="history-section" id="history-section">
+        <!-- History will be populated here -->
+    </div>
+
+    <button class="stats-toggle" onclick="toggleStats()">VER ESTADÍSTICAS DE PILOTOS</button>
+
+    <div class="stats-section" id="stats-section">
+        <!-- Stats will be populated here -->
+    </div>
+
+    <button class="stats-toggle" onclick="toggleTeamStats()">VER ESTADÍSTICAS DE ESCUDERÍAS</button>
+
+    <div class="stats-section" id="team-stats-section">
+        <!-- Team Stats will be populated here -->
+    </div>
+
+    <button class="events-toggle" onclick="toggleEvents()">VER EVENTOS</button>
+
+    <div class="events-section" id="events-section">
+        <!-- Events will be populated here -->
+    </div>
+</div>
+
+<script>
+    const rondas = [
+        "R1-Enero (Sprint)", "R2-Enero (Carrera)", "R3-Marzo (Sprint)", 
+        "R4-Abril (Sprint - LLUVIA)", "R5-Junio (Sprint)", "R6-Septiembre (Sprint)", 
+        "R7-Octubre (Sprint)", "R8-Diciembre (Sprint)", "R9-Diciembre (Final S)", "R10-Diciembre (Final C)"
+    ];
+
+    let pilotos = [
+        {"nombre": "J.Arias", "h": 30, "cons": "pocho_peor", "peso": 70, "learn": 0.0, "p_col": 0.50, "equipo": "Wazowski Tauri", "tag": "WT", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "P.Rivera", "h": 55, "cons": "pocho", "peso": 65, "learn": 0.7, "p_col": 0.15, "equipo": "Wazowski Tauri", "tag": "WT", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "J.Aguado", "h": 40, "cons": "pocho_peor", "peso": 70, "learn": 0.1, "p_col": 0.50, "equipo": "Dickies", "tag": "DK", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "J.Goula", "h": 65, "cons": "decente", "peso": 65, "learn": 0.4, "p_col": 0.25, "equipo": "Montgomery's", "tag": "MG", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "P.Aldea", "h": 70, "cons": "decente", "peso": 70, "learn": 0.5, "p_col": 0.15, "equipo": "Alfa Yayos", "tag": "AY", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "G.Alonso", "h": 80, "cons": "pro", "peso": 65, "learn": 0.4, "p_col": 0.30, "equipo": "Dickies", "tag": "DK", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0}, 
+        {"nombre": "A.Hernández", "h": 90, "cons": "pro", "peso": 65, "learn": 0.6, "p_col": 0.50, "equipo": "El Yayo Racing", "tag": "YR", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "N.Bosqued", "h": 90, "cons": "pro", "peso": 95, "learn": 0.6, "p_col": 0.35, "equipo": "Montgomery's", "tag": "MG", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "J.Chueca", "h": 90, "cons": "pro", "peso": 70, "learn": 0.7, "p_col": 0.25, "equipo": "El Yayo Racing", "tag": "YR", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "J.Rivera", "h": 90, "cons": "pro", "peso": 72, "learn": 0.7, "p_col": 0.20, "equipo": "Alfa Yayos", "tag": "AY", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "R.Navarro", "h": 90, "cons": "pro", "peso": 75, "learn": 0.6, "p_col": 0.30, "equipo": "Caesaravgvsta", "tag": "CV", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0},
+        {"nombre": "S.Javier", "h": 52, "cons": "pocho", "peso": 75, "learn": 0.5, "p_col": 0.20, "equipo": "Caesaravgvsta", "tag": "CV", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0}
+    ];
+
+    // Initialize teams
+    let equipos = [
+        {"nombre": "Wazowski Tauri", "tag": "WT", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Dickies", "tag": "DK", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Montgomery's", "tag": "MG", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Alfa Yayos", "tag": "AY", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "El Yayo Racing", "tag": "YR", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Caesaravgvsta", "tag": "CV", pts: 0, victories: 0, podiums: 0}
+    ];
+
+    let eventos = []; // Array to store events
+
+    let rondaActual = 0;
+    let ordenSalida = ["J.Arias", "P.Rivera", "J.Aguado", "J.Goula", "P.Aldea", "G.Alonso", "A.Hernández", "N.Bosqued", "J.Chueca", "J.Rivera", "R.Navarro", "S.Javier"];
+    let historialCarreras = []; // Array to store history
+    let lastSprintResults = null; // To store the last sprint results for race grid
+
+    function gaussRandom(mean, stdev) {
+        let u = 1 - Math.random();
+        let v = 1 - Math.random();
+        return mean + stdev * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function simularSiguienteRonda() {
+        if (rondaActual >= rondas.length) {
+            alert("¡Temporada finalizada!");
+            return;
+        }
+
+        const ronda = rondas[rondaActual];
+        const esLluvia = ronda.includes("LLUVIA");
+        const vueltas = (ronda.includes("Carrera") || ronda.includes("Final C")) ? 11 : 13;
+        
+        let resultados = [];
+
+        ordenSalida.forEach(p_nom => {
+            const p = pilotos.find(x => x.nombre === p_nom);
+            let h_eff = p.h + (p.learn * rondaActual);
+            let t_total = 0;
+            let mejor_v = 999;
+            let incs = 0;
+
+            for (let v = 1; v <= vueltas; v++) {
+                let t_base;
+                if (p.cons === "pro") t_base = 41.75;
+                else if (p.cons === "decente") t_base = 42.75;
+                else if (p.cons === "pocho") t_base = 43.55;
+                else t_base = 44.0; // pocho_peor
+                
+                let std = p.cons === "pro" ? 0.08 : 0.40;
+                
+                let v_raw = gaussRandom(t_base + (p.peso - 65) * 0.008, std);
+                
+                let suelo;
+                if (p.cons === "pro") suelo = 41.3;
+                else if (p.cons === "decente") suelo = 42.7;
+                else if (p.cons === "pocho") suelo = 43.5;
+                else suelo = 44.5; // pocho_peor
+                
+                let v_final = Math.max(v_raw, suelo + Math.random() * 0.05);
+
+                if (esLluvia) v_final += (Math.random() * 0.6 + 0.6);
+                if (Math.random() < (p.p_col / vueltas)) {
+                    v_final += (Math.random() * 3 + 2);
+                    incs++;
+                }
+
+                t_total += v_final;
+                if (v_final < mejor_v) mejor_v = v_final;
+            }
+            resultados.push({ ...p, total: t_total, best: mejor_v, incs: incs });
+        });
+
+        resultados.sort((a, b) => a.total - b.total);
+        const lider_t = resultados[0].total;
+        const vr_p_nom = [...resultados].sort((a, b) => a.best - b.best)[0].nombre;
+
+        // Actualizar Puntos
+        resultados.forEach((r, idx) => {
+            let ptsGanados = (12 - idx) > 0 ? (12 - idx) : 0;
+            if (r.nombre === vr_p_nom) ptsGanados += 1;
+            const pOriginal = pilotos.find(p => p.nombre === r.nombre);
+            pOriginal.pts += ptsGanados;
+            // Update team points
+            const teamOriginal = equipos.find(t => t.nombre === pOriginal.equipo);
+            teamOriginal.pts += ptsGanados;
+            if (idx === 0) {
+                pOriginal.victories += 1;
+                teamOriginal.victories += 1;
+            }
+            if (idx < 3) {
+                pOriginal.podiums += 1;
+                teamOriginal.podiums += 1;
+            }
+            if (r.nombre === vr_p_nom) pOriginal.fastestLaps += 1;
+        });
+
+        // After calculating results, add events
+        resultados.forEach(r => {
+            if (r.incs > 0) {
+                const pOriginal = pilotos.find(p => p.nombre === r.nombre);
+                pOriginal.accidents += r.incs;
+                // Calculate total accident time penalty
+                let totalAccidentTime = 0;
+                for (let i = 0; i < r.incs; i++) {
+                    totalAccidentTime += Math.random() * 3 + 2;
+                }
+                eventos.push(`${ronda}: ${r.nombre} tuvo ${r.incs} accidente(s), penalización total de ${totalAccidentTime.toFixed(2)}s.`);
+                if (Math.random() < 0.3) { // 30% chance of sanction per incident
+                    pOriginal.sanctions += 1;
+                    const sanctionTime = Math.round((Math.random() * 10 + 5) / 5) * 5; // 5, 10, 15 seconds in 5s increments
+                    r.total += sanctionTime; // Apply penalty to total time
+                    eventos.push(`${ronda}: ${r.nombre} recibió una sanción, penalización de ${sanctionTime.toFixed(2)}s.`);
+                }
+            }
+        });
+
+        // Re-sort after penalties
+        resultados.sort((a, b) => a.total - b.total);
+
+        // After sorting resultados, calculate positions gained
+        resultados.forEach((r, finalIdx) => {
+            const startingIdx = ordenSalida.indexOf(r.nombre);
+            const positionsGained = startingIdx - finalIdx;
+            const pOriginal = pilotos.find(p => p.nombre === r.nombre);
+            pOriginal.positionsGained += positionsGained;
+        });
+
+        actualizarUI(ronda, resultados, vr_p_nom);
+        
+        // After updating UI, store the results
+        historialCarreras.push({
+            ronda: ronda,
+            startingGrid: [...ordenSalida],
+            resultados: resultados.map(r => ({ ...r })),
+            vr_p_nom: vr_p_nom
+        });
+        
+        // Preparar siguiente orden
+        if (ronda.includes("Sprint")) {
+            lastSprintResults = [...resultados]; // Store sprint results
+            ordenSalida = [...resultados].sort((a, b) => a.best - b.best).map(r => r.nombre);
+        } else {
+                ordenSalida = [...resultados].sort((a, b) => a.best - b.best).map(r => r.nombre);
+        }
+        
+        rondaActual++;
+    }
+
+    function actualizarUI(rondaNom, resultados, vr_p_nom) {
+        document.getElementById('ronda-nombre').innerText = rondaNom;
+        
+        // Tabla Carrera
+        const bodyCarrera = document.getElementById('body-carrera');
+        bodyCarrera.innerHTML = "";
+        resultados.forEach((r, idx) => {
+            const gap = idx === 0 ? "LÍDER" : `+${(r.total - resultados[0].total).toFixed(2)}s`;
+            const vrStyle = r.nombre === vr_p_nom ? "color: #00ff41; font-weight: bold;" : "";
+            const row = `<tr>
+                <td class="pos">${idx + 1}º</td>
+                <td class="tag">${r.tag}</td>
+                <td>${r.nombre} ${r.incs > 0 ? '⚠️' : ''}</td>
+                <td>${gap}</td>
+                <td class="vr" style="${vrStyle}">${r.best.toFixed(3)} ${r.nombre === vr_p_nom ? '★' : ''}</td>
+            </tr>`;
+            bodyCarrera.innerHTML += row;
+        });
+
+        // Tabla Mundial
+        const bodyMundial = document.getElementById('body-mundial');
+        bodyMundial.innerHTML = "";
+        const mundialSorted = [...pilotos].sort((a, b) => b.pts - a.pts);
+        const leader = mundialSorted[0];
+        document.getElementById('leader-message').innerText = `¡${leader.nombre} al frente con ${leader.pts} puntos!`;
+        mundialSorted.forEach((p, idx) => {
+            let medal = "";
+            if (idx === 0) medal = "🥇";
+            if (idx === 1) medal = "🥈";
+            if (idx === 2) medal = "🥉";
+            const row = `<tr>
+                <td class="pos">${idx + 1}</td>
+                <td><span class="medal">${medal}</span>${p.nombre}</td>
+                <td style="font-weight: bold;">${p.pts}</td>
+            </tr>`;
+            bodyMundial.innerHTML += row;
+        });
+
+        // Tabla Equipos
+        const bodyEquipos = document.getElementById('body-equipos');
+        bodyEquipos.innerHTML = "";
+        const equiposSorted = [...equipos].sort((a, b) => b.pts - a.pts);
+        const teamLeader = equiposSorted[0];
+        document.getElementById('team-leader-message').innerText = `¡${teamLeader.nombre} al frente con ${teamLeader.pts} puntos!`;
+        equiposSorted.forEach((e, idx) => {
+            let medal = "";
+            if (idx === 0) medal = "🥇";
+            if (idx === 1) medal = "🥈";
+            if (idx === 2) medal = "🥉";
+            const row = `<tr>
+                <td class="pos">${idx + 1}</td>
+                <td><span class="medal">${medal}</span>${e.nombre}</td>
+                <td style="font-weight: bold;">${e.pts}</td>
+            </tr>`;
+            bodyEquipos.innerHTML += row;
+        });
+    }
+
+    function toggleHistory() {
+        const section = document.getElementById('history-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            actualizarHistorial();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function actualizarHistorial() {
+        const section = document.getElementById('history-section');
+        section.innerHTML = '';
+        historialCarreras.forEach((hist, idx) => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+            card.innerHTML = `
+                <div class="history-title">${hist.ronda}</div>
+                <div style="margin-bottom: 20px;">
+                    <h4>Parrilla de Salida</h4>
+                    <ol>
+                        ${hist.startingGrid.map((p, i) => `<li>${p}</li>`).join('')}
+                    </ol>
+                </div>
+                <div>
+                    <h4>Resultados Finales</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>ID</th>
+                                <th>Piloto</th>
+                                <th>Gap</th>
+                                <th>Vuelta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${hist.resultados.map((r, pos) => {
+                                const gap = pos === 0 ? "LÍDER" : `+${(r.total - hist.resultados[0].total).toFixed(2)}s`;
+                                const vrStyle = r.nombre === hist.vr_p_nom ? "color: #00ff41; font-weight: bold;" : "";
+                                return `<tr>
+                                    <td class="pos">${pos + 1}º</td>
+                                    <td class="tag">${r.tag}</td>
+                                    <td>${r.nombre} ${r.incs > 0 ? '⚠️' : ''}</td>
+                                    <td>${gap}</td>
+                                    <td class="vr" style="${vrStyle}">${r.best.toFixed(3)} ${r.nombre === hist.vr_p_nom ? '★' : ''}</td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            section.appendChild(card);
+        });
+    }
+
+    let currentSort = { column: 'pts', order: 'desc' }; // Default sort by points descending
+
+    function toggleStats() {
+        const section = document.getElementById('stats-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            actualizarStats();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function actualizarStats() {
+        const section = document.getElementById('stats-section');
+        section.innerHTML = '';
+        const card = document.createElement('div');
+        card.className = 'stats-card';
+        card.innerHTML = `
+            <div class="history-title">ESTADÍSTICAS DE PILOTOS</div>
+            <select class="sort-select" id="sort-select" onchange="sortStats()">
+                <option value="pts">Ordenar por Puntos</option>
+                <option value="victories">Ordenar por Victorias</option>
+                <option value="podiums">Ordenar por Podios</option>
+                <option value="fastestLaps">Ordenar por Vueltas Rápidas</option>
+                <option value="positionsGained">Ordenar por Posiciones Ganadas</option>
+            </select>
+            <table id="stats-table">
+                <thead>
+                    <tr>
+                        <th>Piloto</th>
+                        <th>Puntos</th>
+                        <th>Victorias</th>
+                        <th>Podios</th>
+                        <th>Vueltas Rápidas</th>
+                        <th>Posiciones Ganadas</th>
+                    </tr>
+                </thead>
+                <tbody id="stats-body">
+                    ${pilotos.map(p => `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>${p.pts}</td>
+                            <td>${p.victories}</td>
+                            <td>${p.podiums}</td>
+                            <td>${p.fastestLaps}</td>
+                            <td>${p.positionsGained}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        section.appendChild(card);
+        document.getElementById('sort-select').value = currentSort.column;
+        updateStatsTable();
+    }
+
+    function sortStats() {
+        const select = document.getElementById('sort-select');
+        currentSort.column = select.value;
+        currentSort.order = 'desc'; // Always descending for stats
+        updateStatsTable();
+    }
+
+    function updateStatsTable() {
+        const sortedPilotos = [...pilotos].sort((a, b) => {
+            let aVal = a[currentSort.column];
+            let bVal = b[currentSort.column];
+            if (aVal !== bVal) {
+                return bVal - aVal; // Descending for primary
+            }
+            // Tie-breakers
+            if (currentSort.column === 'podiums') {
+                if (a.victories !== b.victories) return b.victories - a.victories;
+                if (a.fastestLaps !== b.fastestLaps) return b.fastestLaps - a.fastestLaps;
+                return a.nombre.localeCompare(b.nombre);
+            } else if (currentSort.column === 'victories') {
+                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
+                if (a.fastestLaps !== b.fastestLaps) return b.fastestLaps - a.fastestLaps;
+                return a.nombre.localeCompare(b.nombre);
+            } else if (currentSort.column === 'pts') {
+                if (a.victories !== b.victorias) return b.victorias - a.victorias;
+                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
+                return a.nombre.localeCompare(b.nombre);
+            } else if (currentSort.column === 'fastestLaps') {
+                if (a.victories !== b.victorias) return b.victorias - a.victorias;
+                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
+                return a.nombre.localeCompare(b.nombre);
+            } else if (currentSort.column === 'positionsGained') {
+                if (a.victorias !== b.victorias) return b.victorias - a.victorias;
+                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
+                return a.nombre.localeCompare(b.nombre);
+            }
+            return 0;
+        });
+        const body = document.getElementById('stats-body');
+        body.innerHTML = sortedPilotos.map(p => `
+            <tr>
+                <td>${p.nombre}</td>
+                <td>${p.pts}</td>
+                <td>${p.victories}</td>
+                <td>${p.podiums}</td>
+                <td>${p.fastestLaps}</td>
+                <td>${p.positionsGained}</td>
+            </tr>
+        `).join('');
+    }
+
+    function toggleTeamStats() {
+        const section = document.getElementById('team-stats-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            actualizarTeamStats();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function actualizarTeamStats() {
+        const section = document.getElementById('team-stats-section');
+        section.innerHTML = '';
+        const card = document.createElement('div');
+        card.className = 'stats-card';
+        card.innerHTML = `
+            <div class="history-title">ESTADÍSTICAS DE CONSTRUCTORES</div>
+            <select class="sort-select" id="team-sort-select" onchange="sortTeamStats()">
+                <option value="pts">Ordenar por Puntos</option>
+                <option value="victories">Ordenar por Victorias</option>
+                <option value="podiums">Ordenar por Podios</option>
+            </select>
+            <table id="team-stats-table">
+                <thead>
+                    <tr>
+                        <th>Equipo</th>
+                        <th>Puntos</th>
+                        <th>Victorias</th>
+                        <th>Podios</th>
+                    </tr>
+                </thead>
+                <tbody id="team-stats-body">
+                    ${equipos.map(e => `
+                        <tr>
+                            <td>${e.nombre}</td>
+                            <td>${e.pts}</td>
+                            <td>${e.victories}</td>
+                            <td>${e.podiums}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        section.appendChild(card);
+        document.getElementById('team-sort-select').value = 'pts';
+        updateTeamStatsTable('pts');
+    }
+
+    function sortTeamStats() {
+        const select = document.getElementById('team-sort-select');
+        updateTeamStatsTable(select.value);
+    }
+
+    function updateTeamStatsTable(sortColumn) {
+        const sortedEquipos = [...equipos].sort((a, b) => {
+            let aVal = a[sortColumn];
+            let bVal = b[sortColumn];
+            if (aVal !== bVal) {
+                return bVal - aVal; // Descending for primary
+            }
+            // Tie-breakers
+            if (sortColumn === 'podiums') {
+                if (a.victories !== b.victories) return b.victories - a.victories;
+                if (a.pts !== b.pts) return b.pts - a.pts;
+                return a.nombre.localeCompare(b.nombre);
+            } else if (sortColumn === 'victories') {
+                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
+                if (a.pts !== b.pts) return b.pts - a.pts;
+                return a.nombre.localeCompare(b.nombre);
+            } else if (sortColumn === 'pts') {
+                if (a.victories !== b.victorias) return b.victorias - a.victorias;
+                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
+                return a.nombre.localeCompare(b.nombre);
+            }
+            return 0;
+        });
+        const body = document.getElementById('team-stats-body');
+        body.innerHTML = sortedEquipos.map(e => `
+            <tr>
+                <td>${e.nombre}</td>
+                <td>${e.pts}</td>
+                <td>${e.victories}</td>
+                <td>${e.podiums}</td>
+            </tr>
+        `).join('');
+    }
+
+    function toggleEvents() {
+        const section = document.getElementById('events-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            actualizarEvents();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function actualizarEvents() {
+        const section = document.getElementById('events-section');
+        section.innerHTML = '';
+        const card = document.createElement('div');
+        card.className = 'events-card';
+        card.innerHTML = `
+            <div class="history-title">EVENTOS</div>
+            <div>
+                ${eventos.length > 0 ? eventos.map(e => `<div class="event-item">${e}</div>`).join('') : '<p>No hay eventos registrados.</p>'}
+            </div>
+        `;
+        section.appendChild(card);
+    }
+</script>
+
+</body>
+</html>
