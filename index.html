@@ -511,7 +511,7 @@ function simularSiguienteRonda() {
         let t_total = 0;
         let mejor_v = 999;
         let incs = 0;
-        let tiempoPerdidoIncs = 0; // Nueva variable para rastrear el tiempo exacto perdido
+        let tiempoPerdidoIncs = 0; 
 
         for (let v = 1; v <= vueltas; v++) {
             let t_base;
@@ -531,12 +531,11 @@ function simularSiguienteRonda() {
 
             if (esLluvia) v_final += (Math.random() * 0.6 + 0.6);
 
-            // --- LÓGICA DE ERRORES BASADA EN HABILIDAD ---
-            // A menos h_eff (habilidad efectiva), más probabilidad de error
+            // Probabilidad de error: Influye p_col y se penaliza la baja habilidad (h_eff)
             let probError = (p.p_col / vueltas) * (1 + (100 - h_eff) / 100);
             
             if (Math.random() < probError) {
-                let perdida = (Math.random() * 3 + 2); // Perder entre 2 y 5 segundos
+                let perdida = (Math.random() * 3 + 2); 
                 v_final += perdida;
                 tiempoPerdidoIncs += perdida;
                 incs++;
@@ -548,14 +547,11 @@ function simularSiguienteRonda() {
         resultados.push({ ...p, total: t_total, best: mejor_v, incs: incs, tiempoPerdidoIncs: tiempoPerdidoIncs });
     });
 
-    // --- PROCESAMIENTO DE COLISIONES Y SANCIONES ---
+    // --- LÓGICA DE EVENTOS Y SANCIONES ---
     let implicados = resultados.filter(r => r.incs > 0);
 
     if (implicados.length >= 2) {
-        // Formato COLISIÓN (Piloto 1, Piloto 2...)
         const nombresImplicados = implicados.map(p => p.nombre).join(", ");
-        
-        // Decidir culpable por agresividad (p_col)
         let agresividadTotal = implicados.reduce((sum, p) => sum + p.p_col, 0);
         let ticketGanador = Math.random() * agresividadTotal;
         let acumulado = 0;
@@ -571,63 +567,54 @@ function simularSiguienteRonda() {
         const sanctionTime = Math.round((Math.random() * 10 + 5) / 5) * 5; 
         culpable.total += sanctionTime; 
 
-        eventos.push(`${ronda}: COLISIÓN (${nombresImplicados}). ${culpable.nombre} recibe +${sanctionTime}s de sanción.`);
+        eventos.push(`${ronda}: COLISIÓN (${nombresImplicados}). ${culpable.nombre} sancionado con +${sanctionTime}s.`);
     } 
-    // Error individual: sale en eventos con el tiempo perdido
     else if (implicados.length === 1) {
         const solo = implicados[0];
         eventos.push(`${ronda}: ${solo.nombre} cometió un error individual y perdió ${solo.tiempoPerdidoIncs.toFixed(2)}s.`);
     }
 
-    // Actualizar estadísticas permanentes
-    resultados.forEach(r => {
-        if (r.incs > 0) {
-            const pOriginal = pilotos.find(p => p.nombre === r.nombre);
-            pOriginal.accidents += r.incs;
-        }
+    // Re-ordenar tras posibles sanciones administrativas
+    resultados.sort((a, b) => a.total - b.total);
+    
+    const vr_p_nom = [...resultados].sort((a, b) => a.best - b.best)[0].nombre;
+
+    // Actualizar Puntos y Estadísticas permanentes
+    resultados.forEach((r, idx) => {
+        let ptsGanados = (12 - idx) > 0 ? (12 - idx) : 0;
+        if (r.nombre === vr_p_nom) ptsGanados += 1;
+        
+        const pOriginal = pilotos.find(p => p.nombre === r.nombre);
+        pOriginal.pts += ptsGanados;
+        pOriginal.accidents += r.incs; // Registrar accidentes para la tabla de stats
+
+        const teamOriginal = equipos.find(t => t.nombre === pOriginal.equipo);
+        teamOriginal.pts += ptsGanados;
+
+        if (idx === 0) { pOriginal.victories++; teamOriginal.victories++; }
+        if (idx < 3) { pOriginal.podiums++; teamOriginal.podiums++; }
+        if (r.nombre === vr_p_nom) pOriginal.fastestLaps++;
+
+        // Calcular posiciones ganadas
+        const startingIdx = ordenSalida.indexOf(r.nombre);
+        pOriginal.positionsGained += (startingIdx - idx);
     });
 
-    // Re-ordenar por tiempo total tras aplicar sanciones
-    resultados.sort((a, b) => a.total - b.total);
+    // Actualizar Interfaz
+    actualizarUI(ronda, resultados, vr_p_nom);
+    
+    historialCarreras.push({
+        ronda: ronda,
+        startingGrid: [...ordenSalida],
+        resultados: resultados.map(r => ({ ...r })),
+        vr_p_nom: vr_p_nom
+    });
 
-    // [Resto del código original de puntos y UI...]
-    actualizarPuntosYUI(ronda, resultados); 
+    // Preparar parrilla para la siguiente (ordenada por vuelta rápida)
+    ordenSalida = [...resultados].sort((a, b) => a.best - b.best).map(r => r.nombre);
+    
+    rondaActual++;
 }
-
-        // Re-sort after penalties
-        resultados.sort((a, b) => a.total - b.total);
-
-        // After sorting resultados, calculate positions gained
-        resultados.forEach((r, finalIdx) => {
-            const startingIdx = ordenSalida.indexOf(r.nombre);
-            const positionsGained = startingIdx - finalIdx;
-            const pOriginal = pilotos.find(p => p.nombre === r.nombre);
-            pOriginal.positionsGained += positionsGained;
-        });
-
-        actualizarUI(ronda, resultados, vr_p_nom);
-        
-        // After updating UI, store the results
-        historialCarreras.push({
-            ronda: ronda,
-            startingGrid: [...ordenSalida],
-            resultados: resultados.map(r => ({ ...r })),
-            vr_p_nom: vr_p_nom
-        });
-        
-        // Preparar siguiente orden
-        if (ronda.includes("Sprint")) {
-            lastSprintResults = [...resultados]; // Store sprint results
-            ordenSalida = [...resultados].sort((a, b) => a.best - b.best).map(r => r.nombre);
-        } else {
-                ordenSalida = [...resultados].sort((a, b) => a.best - b.best).map(r => r.nombre);
-        }
-        
-        rondaActual++;
-    }
-
-    function actualizarUI(rondaNom, resultados, vr_p_nom) {
-        document.getElementById('ronda-nombre').innerText = rondaNom;
         
         // Tabla Carrera
         const bodyCarrera = document.getElementById('body-carrera');
@@ -975,6 +962,7 @@ function simularSiguienteRonda() {
 
 </body>
 </html>
+
 
 
 
