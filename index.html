@@ -282,79 +282,43 @@
     <button class="btn-simular" onclick="simularSiguienteRonda()">SIMULAR SIGUIENTE RONDA</button>
 
     <div class="dashboard">
-        <div class="card">
+        <div class="card" style="grid-column: 1 / -1;">
             <div id="ronda-nombre" class="ronda-info">ESPERANDO INICIO...</div>
             <table id="tabla-carrera">
                 <thead>
-                    <tr>
-                        <th>Pos</th>
-                        <th>ID</th>
-                        <th>Piloto</th>
-                        <th>Gap</th>
-                        <th>Vuelta</th>
-                    </tr>
+                    <tr><th>Pos</th><th>ID</th><th>Piloto</th><th>Gap</th><th>Vuelta</th></tr>
                 </thead>
-                <tbody id="body-carrera">
-                    </tbody>
+                <tbody id="body-carrera"></tbody>
             </table>
         </div>
 
         <div class="card">
             <div class="standings-title">MUNDIAL DE PILOTOS</div>
-            <div id="leader-message" style="color: var(--accent); font-size: 0.9rem; margin-bottom: 10px;">¡Compite por la cima!</div>
+            <div id="leader-message" style="color: var(--accent); font-size: 0.9rem; margin-bottom: 10px;"></div>
             <table id="tabla-mundial">
-                <thead>
-                    <tr>
-                        <th>Pos</th>
-                        <th>Piloto</th>
-                        <th>Pts</th>
-                    </tr>
-                </thead>
-                <tbody id="body-mundial">
-                    </tbody>
+                <thead><tr><th>Pos</th><th>Piloto</th><th>Pts</th></tr></thead>
+                <tbody id="body-mundial"></tbody>
             </table>
         </div>
 
         <div class="card">
             <div class="standings-title">MUNDIAL DE CONSTRUCTORES</div>
-            <div id="team-leader-message" style="color: var(--accent); font-size: 0.9rem; margin-bottom: 10px;">¡Equipos compitiendo!</div>
+            <div id="team-leader-message" style="color: var(--accent); font-size: 0.9rem; margin-bottom: 10px;"></div>
             <table id="tabla-equipos">
-                <thead>
-                    <tr>
-                        <th>Pos</th>
-                        <th>Equipo</th>
-                        <th>Pts</th>
-                    </tr>
-                </thead>
-                <tbody id="body-equipos">
-                    </tbody>
+                <thead><tr><th>Pos</th><th>Equipo</th><th>Pts</th></tr></thead>
+                <tbody id="body-equipos"></tbody>
             </table>
         </div>
     </div>
 
-    <button class="history-toggle" onclick="toggleHistory()">VER HISTORIAL DE CARRERAS</button>
+    <button class="events-toggle" onclick="toggleEvents()">VER LOG DE EVENTOS</button>
+    <div class="events-section" id="events-section"></div>
 
-    <div class="history-section" id="history-section">
-        <!-- History will be populated here -->
-    </div>
+    <button class="history-toggle" onclick="toggleHistory()">VER HISTORIAL DE CARRERAS</button>
+    <div class="history-section" id="history-section"></div>
 
     <button class="stats-toggle" onclick="toggleStats()">VER ESTADÍSTICAS DE PILOTOS</button>
-
-    <div class="stats-section" id="stats-section">
-        <!-- Stats will be populated here -->
-    </div>
-
-    <button class="stats-toggle" onclick="toggleTeamStats()">VER ESTADÍSTICAS DE ESCUDERÍAS</button>
-
-    <div class="stats-section" id="team-stats-section">
-        <!-- Team Stats will be populated here -->
-    </div>
-
-    <button class="events-toggle" onclick="toggleEvents()">VER EVENTOS</button>
-
-    <div class="events-section" id="events-section">
-        <!-- Events will be populated here -->
-    </div>
+    <div class="stats-section" id="stats-section"></div>
 </div>
 
 <script>
@@ -379,22 +343,19 @@
         {"nombre": "S.Rubio", "h": 52, "cons": "pocho", "peso": 75, "learn": 0.5, "p_col": 0.20, "equipo": "Caesaravgvsta", "tag": "CV", pts: 0, victories: 0, podiums: 0, fastestLaps: 0, accidents: 0, sanctions: 0, positionsGained: 0}
     ];
 
-    // Initialize teams
     let equipos = [
-        {"nombre": "Wazowski Tauri", "tag": "WT", pts: 0, victories: 0, podiums: 0},
-        {"nombre": "Dickies", "tag": "DK", pts: 0, victories: 0, podiums: 0},
-        {"nombre": "Montgomery's", "tag": "MG", pts: 0, victories: 0, podiums: 0},
-        {"nombre": "Alfa Yayos", "tag": "AY", pts: 0, victories: 0, podiums: 0},
-        {"nombre": "El Yayo Racing", "tag": "YR", pts: 0, victories: 0, podiums: 0},
-        {"nombre": "Caesaravgvsta", "tag": "CV", pts: 0, victories: 0, podiums: 0}
+        {"nombre": "Wazowski Tauri", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Dickies", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Montgomery's", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Alfa Yayos", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "El Yayo Racing", pts: 0, victories: 0, podiums: 0},
+        {"nombre": "Caesaravgvsta", pts: 0, victories: 0, podiums: 0}
     ];
 
-    let eventos = []; // Debe estar fuera de cualquier función
-
+    let eventos = [];
     let rondaActual = 0;
-    let ordenSalida = ["J.Arias", "P.Rivera", "J.Aguado", "J.Goula", "P.Aldea", "G.Alonso", "A.Hernández", "N.Bosqued", "J.Chueca", "J.Rivera", "R.Navarro", "S.Rubio"];
-    let historialCarreras = []; // Array to store history
-    let lastSprintResults = null; // To store the last sprint results for race grid
+    let ordenSalida = pilotos.map(p => p.nombre);
+    let historialCarreras = [];
 
     function gaussRandom(mean, stdev) {
         let u = 1 - Math.random();
@@ -402,580 +363,138 @@
         return mean + stdev * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     }
 
+    // --- FUNCIÓN ÚNICA DE SIMULACIÓN CORREGIDA ---
     function simularSiguienteRonda() {
-        if (rondaActual >= rondas.length) {
-            alert("¡Temporada finalizada!");
-            return;
-        }
+        if (rondaActual >= rondas.length) { alert("¡Temporada finalizada!"); return; }
 
         const ronda = rondas[rondaActual];
         const esLluvia = ronda.includes("LLUVIA");
         const vueltas = (ronda.includes("Carrera") || ronda.includes("Final C")) ? 11 : 13;
-        
         let resultados = [];
 
+        // 1. Simulación de tiempos por vuelta
         ordenSalida.forEach(p_nom => {
             const p = pilotos.find(x => x.nombre === p_nom);
             let h_eff = p.h + (p.learn * rondaActual);
-            let t_total = 0;
-            let mejor_v = 999;
-            let incs = 0;
+            let t_total = 0, mejor_v = 999, incs = 0, t_perdido = 0;
 
             for (let v = 1; v <= vueltas; v++) {
-                let t_base;
-                if (p.cons === "pro") t_base = 41.75;
-                else if (p.cons === "decente") t_base = 42.75;
-                else if (p.cons === "pocho") t_base = 43.55;
-                else t_base = 44.0; // pocho_peor
-                
+                let t_base = p.cons === "pro" ? 41.75 : p.cons === "decente" ? 42.75 : p.cons === "pocho" ? 43.55 : 44.0;
                 let std = p.cons === "pro" ? 0.08 : 0.40;
+                let factorPeso = (p.nombre === "N.Bosqued") ? 0.008 : 0.002;
                 
-                // Influence of weight on lap time.
-                // Default factor 0.008; reduce it for N.Bosqued so peso casi no influye.
-                const defaultWeightFactor = 0.002;
-                const reducedWeightFactorForNB = 0.008; // casi nulo
-                const weightFactor = (p.nombre === "N.Bosqued") ? reducedWeightFactorForNB : defaultWeightFactor;
-                let v_raw = gaussRandom(t_base + (p.peso - 65) * weightFactor, std);
-                
-                // Penalización leve por vuelta para G.Alonso (es un poco peor que el resto de pros)
-                if (p.nombre === "G.Alonso") {
-                    const penaltyPerLap = 0.05; // ajustar si quieres más/menos diferencia
-                    v_raw += penaltyPerLap;
-                }
-                
-                let suelo;
-                if (p.cons === "pro") suelo = 41.3;
-                else if (p.cons === "decente") suelo = 42.7;
-                else if (p.cons === "pocho") suelo = 43.5;
-                else suelo = 44.5; // pocho_peor
-                
-                let v_final = Math.max(v_raw, suelo + Math.random() * 0.05);
+                let v_raw = gaussRandom(t_base + (p.peso - 65) * factorPeso, std);
+                if (p.nombre === "G.Alonso") v_raw += 0.05;
 
+                let v_final = Math.max(v_raw, (p.cons === "pro" ? 41.3 : 42.7));
                 if (esLluvia) v_final += (Math.random() * 0.6 + 0.6);
-                if (Math.random() < (p.p_col / vueltas)) {
-                    v_final += (Math.random() * 3 + 2);
+
+                // Probabilidad de error según habilidad (h) y p_col
+                let probError = (p.p_col / vueltas) * (1 + (100 - h_eff) / 100);
+                if (Math.random() < probError) {
+                    let p_extra = Math.random() * 3 + 2; // Pierde entre 2 y 5 seg
+                    v_final += p_extra;
+                    t_perdido += p_extra;
                     incs++;
                 }
-
                 t_total += v_final;
                 if (v_final < mejor_v) mejor_v = v_final;
             }
-            resultados.push({ ...p, total: t_total, best: mejor_v, incs: incs });
+            resultados.push({ ...p, total: t_total, best: mejor_v, incs: incs, t_perdido: t_perdido });
         });
 
+        // 2. Gestión de Incidentes y Sanciones
+        let conIncidentes = resultados.filter(r => r.incs > 0);
+        if (conIncidentes.length >= 2) {
+            let agresividadTotal = conIncidentes.reduce((s, p) => s + p.p_col, 0);
+            let ticket = Math.random() * agresividadTotal;
+            let acc = 0, culpable = conIncidentes[0];
+            for (let p of conIncidentes) {
+                acc += p.p_col;
+                if (ticket <= acc) { culpable = p; break; }
+            }
+            const sanction = Math.round((Math.random() * 10 + 5) / 5) * 5;
+            culpable.total += sanction;
+            pilotos.find(p => p.nombre === culpable.nombre).sanctions++;
+            eventos.push(`${ronda}: COLISIÓN (${conIncidentes.map(i=>i.nombre).join(", ")}). ${culpable.nombre} sancionado +${sanction}s.`);
+        } else if (conIncidentes.length === 1) {
+            eventos.push(`${ronda}: ${conIncidentes[0].nombre} cometió un error individual y perdió ${conIncidentes[0].t_perdido.toFixed(2)}s.`);
+        }
+
+        // 3. Ordenar resultados finales tras sanciones
         resultados.sort((a, b) => a.total - b.total);
-        const lider_t = resultados[0].total;
         const vr_p_nom = [...resultados].sort((a, b) => a.best - b.best)[0].nombre;
 
-        // Actualizar Puntos
+        // 4. Actualizar Puntos y Estadísticas
         resultados.forEach((r, idx) => {
-            let ptsGanados = (12 - idx) > 0 ? (12 - idx) : 0;
-            if (r.nombre === vr_p_nom) ptsGanados += 1;
-            const pOriginal = pilotos.find(p => p.nombre === r.nombre);
-            pOriginal.pts += ptsGanados;
-            // Update team points
-            const teamOriginal = equipos.find(t => t.nombre === pOriginal.equipo);
-            teamOriginal.pts += ptsGanados;
-            if (idx === 0) {
-                pOriginal.victories += 1;
-                teamOriginal.victories += 1;
-            }
-            if (idx < 3) {
-                pOriginal.podiums += 1;
-                teamOriginal.podiums += 1;
-            }
-            if (r.nombre === vr_p_nom) pOriginal.fastestLaps += 1;
+            let pts = (12 - idx) > 0 ? (12 - idx) : 0;
+            if (r.nombre === vr_p_nom) pts += 1;
+            const pO = pilotos.find(p => p.nombre === r.nombre);
+            pO.pts += pts;
+            pO.accidents += r.incs;
+            pO.positionsGained += (ordenSalida.indexOf(r.nombre) - idx);
+            const tO = equipos.find(t => t.nombre === pO.equipo);
+            tO.pts += pts;
+            if (idx === 0) { pO.victories++; tO.victories++; }
+            if (idx < 3) { pO.podiums++; tO.podiums++; }
+            if (r.nombre === vr_p_nom) pO.fastestLaps++;
         });
 
-        // After calculating results, add events
-        // --- LÓGICA DE COLISIONES Y SANCIONES ACTUALIZADA ---
-
-// 1. Identificar quiénes han tenido incidentes en esta ronda
-// --- LÓGICA DE COLISIONES Y SANCIONES ACTUALIZADA ---
-
-function simularSiguienteRonda() {
-    if (rondaActual >= rondas.length) {
-        alert("¡Temporada finalizada!");
-        return;
-    }
-
-    const ronda = rondas[rondaActual];
-    const esLluvia = ronda.includes("LLUVIA");
-    const vueltas = (ronda.includes("Carrera") || ronda.includes("Final C")) ? 11 : 13;
-    
-    let resultados = [];
-
-    ordenSalida.forEach(p_nom => {
-        const p = pilotos.find(x => x.nombre === p_nom);
-        let h_eff = p.h + (p.learn * rondaActual);
-        let t_total = 0;
-        let mejor_v = 999;
-        let incs = 0;
-        let tiempoPerdidoIncs = 0; 
-
-        for (let v = 1; v <= vueltas; v++) {
-            let t_base;
-            if (p.cons === "pro") t_base = 41.75;
-            else if (p.cons === "decente") t_base = 42.75;
-            else if (p.cons === "pocho") t_base = 43.55;
-            else t_base = 44.0; 
-            
-            let std = p.cons === "pro" ? 0.08 : 0.40;
-            const weightFactor = (p.nombre === "N.Bosqued") ? 0.008 : 0.002;
-            let v_raw = gaussRandom(t_base + (p.peso - 65) * weightFactor, std);
-            
-            if (p.nombre === "G.Alonso") v_raw += 0.05;
-            
-            let suelo = (p.cons === "pro") ? 41.3 : (p.cons === "decente") ? 42.7 : 43.5;
-            let v_final = Math.max(v_raw, suelo + Math.random() * 0.05);
-
-            if (esLluvia) v_final += (Math.random() * 0.6 + 0.6);
-
-            // Probabilidad de error: Influye p_col y se penaliza la baja habilidad (h_eff)
-            let probError = (p.p_col / vueltas) * (1 + (100 - h_eff) / 100);
-            
-            if (Math.random() < probError) {
-                let perdida = (Math.random() * 3 + 2); 
-                v_final += perdida;
-                tiempoPerdidoIncs += perdida;
-                incs++;
-            }
-
-            t_total += v_final;
-            if (v_final < mejor_v) mejor_v = v_final;
-        }
-        resultados.push({ ...p, total: t_total, best: mejor_v, incs: incs, tiempoPerdidoIncs: tiempoPerdidoIncs });
-    });
-
-    // --- LÓGICA DE EVENTOS Y SANCIONES ---
-    // --- PROCESAMIENTO DE EVENTOS (Copia esto tal cual) ---
-    let implicados = resultados.filter(r => r.incs > 0);
-
-    if (implicados.length >= 2) {
-        const nombresImplicados = implicados.map(p => p.nombre).join(", ");
-        let agresividadTotal = implicados.reduce((sum, p) => sum + p.p_col, 0);
-        let ticketGanador = Math.random() * agresividadTotal;
-        let acumulado = 0;
-        let culpable = implicados[0];
-
-        for (let p of implicados) {
-            acumulado += p.p_col;
-            if (ticketGanador <= acumulado) { culpable = p; break; }
-        }
-
-        const pOriginal = pilotos.find(p => p.nombre === culpable.nombre);
-        pOriginal.sanctions += 1;
-        const sanctionTime = Math.round((Math.random() * 10 + 5) / 5) * 5; 
-        culpable.total += sanctionTime; 
-
-        // ESTA LÍNEA ES CLAVE: Guarda el evento en el array global
-        eventos.push(`${ronda}: COLISIÓN (${nombresImplicados}). ${culpable.nombre} sancionado con +${sanctionTime}s.`);
-    } 
-    else if (implicados.length === 1) {
-        const solo = implicados[0];
-        // ESTA LÍNEA ES CLAVE: Guarda el error individual
-        eventos.push(`${ronda}: ${solo.nombre} cometió un error individual y perdió ${solo.tiempoPerdidoIncs.toFixed(2)}s.`);
-    }
-
-    // Re-ordenar tras posibles sanciones administrativas
-    resultados.sort((a, b) => a.total - b.total);
-    
-    const vr_p_nom = [...resultados].sort((a, b) => a.best - b.best)[0].nombre;
-
-    // Actualizar Puntos y Estadísticas permanentes
-    resultados.forEach((r, idx) => {
-        let ptsGanados = (12 - idx) > 0 ? (12 - idx) : 0;
-        if (r.nombre === vr_p_nom) ptsGanados += 1;
+        // 5. Guardar en historial y preparar UI
+        historialCarreras.push({ ronda, startingGrid: [...ordenSalida], resultados: JSON.parse(JSON.stringify(resultados)), vr_p_nom });
+        actualizarPantalla(ronda, resultados, vr_p_nom);
         
-        const pOriginal = pilotos.find(p => p.nombre === r.nombre);
-        pOriginal.pts += ptsGanados;
-        pOriginal.accidents += r.incs; // Registrar accidentes para la tabla de stats
+        // Parrilla para la siguiente basada en Vuelta Rápida
+        ordenSalida = [...resultados].sort((a, b) => a.best - b.best).map(r => r.nombre);
+        rondaActual++;
+    }
 
-        const teamOriginal = equipos.find(t => t.nombre === pOriginal.equipo);
-        teamOriginal.pts += ptsGanados;
-
-        if (idx === 0) { pOriginal.victories++; teamOriginal.victories++; }
-        if (idx < 3) { pOriginal.podiums++; teamOriginal.podiums++; }
-        if (r.nombre === vr_p_nom) pOriginal.fastestLaps++;
-
-        // Calcular posiciones ganadas
-        const startingIdx = ordenSalida.indexOf(r.nombre);
-        pOriginal.positionsGained += (startingIdx - idx);
-    });
-
-    // Actualizar Interfaz
-    actualizarUI(ronda, resultados, vr_p_nom);
-    
-    historialCarreras.push({
-        ronda: ronda,
-        startingGrid: [...ordenSalida],
-        resultados: resultados.map(r => ({ ...r })),
-        vr_p_nom: vr_p_nom
-    });
-
-    // Preparar parrilla para la siguiente (ordenada por vuelta rápida)
-    ordenSalida = [...resultados].sort((a, b) => a.best - b.best).map(r => r.nombre);
-    
-    rondaActual++;
-}
+    // --- FUNCIONES DE INTERFAZ ---
+    function actualizarPantalla(ronda, resultados, vr_p_nom) {
+        document.getElementById('ronda-nombre').innerText = ronda;
         
-        // Tabla Carrera
-        const bodyCarrera = document.getElementById('body-carrera');
-        bodyCarrera.innerHTML = "";
-        resultados.forEach((r, idx) => {
-            let gap = "";
-            if (idx === 0) {
-                gap = "LÍDER";
-            } else {
-                const gapToPrevious = (r.total - resultados[idx - 1].total).toFixed(2);
-                const gapToLeader = (r.total - resultados[0].total).toFixed(2);
-                gap = `+${gapToPrevious}s (+${gapToLeader}s)`;
-            }
-            const vrStyle = r.nombre === vr_p_nom ? "color: #00ff41; font-weight: bold;" : "";
-            const row = `<tr>
-                <td class="pos">${idx + 1}º</td>
-                <td class="tag">${r.tag}</td>
-                <td>${r.nombre} ${r.incs > 0 ? '⚠️' : ''}</td>
-                <td>${gap}</td>
-                <td class="vr" style="${vrStyle}">${r.best.toFixed(3)} ${r.nombre === vr_p_nom ? '★' : ''}</td>
-            </tr>`;
-            bodyCarrera.innerHTML += row;
-        });
-
-        // Tabla Mundial
-        const bodyMundial = document.getElementById('body-mundial');
-        bodyMundial.innerHTML = "";
-        const mundialSorted = [...pilotos].sort((a, b) => b.pts - a.pts);
-        const leader = mundialSorted[0];
-        document.getElementById('leader-message').innerText = `¡${leader.nombre} al frente con ${leader.pts} puntos!`;
-        mundialSorted.forEach((p, idx) => {
-            let medal = "";
-            if (idx === 0) medal = "🥇";
-            if (idx === 1) medal = "🥈";
-            if (idx === 2) medal = "🥉";
-            const row = `<tr>
-                <td class="pos">${idx + 1}</td>
-                <td><span class="medal">${medal}</span>${p.nombre}</td>
-                <td style="font-weight: bold;">${p.pts}</td>
-            </tr>`;
-            bodyMundial.innerHTML += row;
-        });
-
-        // Tabla Equipos
-        const bodyEquipos = document.getElementById('body-equipos');
-        bodyEquipos.innerHTML = "";
-        const equiposSorted = [...equipos].sort((a, b) => b.pts - a.pts);
-        const teamLeader = equiposSorted[0];
-        document.getElementById('team-leader-message').innerText = `¡${teamLeader.nombre} al frente con ${teamLeader.pts} puntos!`;
-        equiposSorted.forEach((e, idx) => {
-            let medal = "";
-            if (idx === 0) medal = "🥇";
-            if (idx === 1) medal = "🥈";
-            if (idx === 2) medal = "🥉";
-            const row = `<tr>
-                <td class="pos">${idx + 1}</td>
-                <td><span class="medal">${medal}</span>${e.nombre}</td>
-                <td style="font-weight: bold;">${e.pts}</td>
-            </tr>`;
-            bodyEquipos.innerHTML += row;
-        });
-    }
-
-    function toggleHistory() {
-        const section = document.getElementById('history-section');
-        if (section.style.display === 'none' || section.style.display === '') {
-            section.style.display = 'block';
-            actualizarHistorial();
-        } else {
-            section.style.display = 'none';
-        }
-    }
-
-    function actualizarHistorial() {
-        const section = document.getElementById('history-section');
-        section.innerHTML = '';
-        historialCarreras.forEach((hist, idx) => {
-            const card = document.createElement('div');
-            card.className = 'history-card';
-            card.innerHTML = `
-                <div class="history-title">${hist.ronda}</div>
-                <div style="margin-bottom: 20px;">
-                    <h4>Parrilla de Salida</h4>
-                    <ol>
-                        ${hist.startingGrid.map((p, i) => `<li>${p}</li>`).join('')}
-                    </ol>
-                </div>
-                <div>
-                    <h4>Resultados Finales</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Pos</th>
-                                <th>ID</th>
-                                <th>Piloto</th>
-                                <th>Gap</th>
-                                <th>Vuelta</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${hist.resultados.map((r, pos) => {
-                                let gap = "";
-                                if (pos === 0) {
-                                    gap = "LÍDER";
-                                } else {
-                                    const gapToPrevious = (r.total - hist.resultados[pos - 1].total).toFixed(2);
-                                    const gapToLeader = (r.total - hist.resultados[0].total).toFixed(2);
-                                    gap = `+${gapToPrevious}s (+${gapToLeader}s)`;
-                                }
-                                const vrStyle = r.nombre === hist.vr_p_nom ? "color: #00ff41; font-weight: bold;" : "";
-                                return `<tr>
-                                    <td class="pos">${pos + 1}º</td>
-                                    <td class="tag">${r.tag}</td>
-                                    <td>${r.nombre} ${r.incs > 0 ? '⚠️' : ''}</td>
-                                    <td>${gap}</td>
-                                    <td class="vr" style="${vrStyle}">${r.best.toFixed(3)} ${r.nombre === hist.vr_p_nom ? '★' : ''}</td>
-                                </tr>`;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            section.appendChild(card);
-        });
-    }
-
-    let currentSort = { column: 'pts', order: 'desc' }; // Default sort by points descending
-
-    function toggleStats() {
-        const section = document.getElementById('stats-section');
-        if (section.style.display === 'none' || section.style.display === '') {
-            section.style.display = 'block';
-            actualizarStats();
-        } else {
-            section.style.display = 'none';
-        }
-    }
-
-    function actualizarStats() {
-        const section = document.getElementById('stats-section');
-        section.innerHTML = '';
-        const card = document.createElement('div');
-        card.className = 'stats-card';
-        card.innerHTML = `
-            <div class="history-title">ESTADÍSTICAS DE PILOTOS</div>
-            <select class="sort-select" id="sort-select" onchange="sortStats()">
-                <option value="pts">Ordenar por Puntos</option>
-                <option value="victories">Ordenar por Victorias</option>
-                <option value="podiums">Ordenar por Podios</option>
-                <option value="fastestLaps">Ordenar por Vueltas Rápidas</option>
-                <option value="positionsGained">Ordenar por Posiciones Ganadas</option>
-            </select>
-            <table id="stats-table">
-                <thead>
-                    <tr>
-                        <th>Piloto</th>
-                        <th>Puntos</th>
-                        <th>Victorias</th>
-                        <th>Podios</th>
-                        <th>Vueltas Rápidas</th>
-                        <th>Posiciones Ganadas</th>
-                    </tr>
-                </thead>
-                <tbody id="stats-body">
-                    ${pilotos.map(p => `
-                        <tr>
-                            <td>${p.nombre}</td>
-                            <td>${p.pts}</td>
-                            <td>${p.victories}</td>
-                            <td>${p.podiums}</td>
-                            <td>${p.fastestLaps}</td>
-                            <td>${p.positionsGained}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-        section.appendChild(card);
-        document.getElementById('sort-select').value = currentSort.column;
-        updateStatsTable();
-    }
-
-    function sortStats() {
-        const select = document.getElementById('sort-select');
-        currentSort.column = select.value;
-        currentSort.order = 'desc'; // Always descending for stats
-        updateStatsTable();
-    }
-
-    function updateStatsTable() {
-        const sortedPilotos = [...pilotos].sort((a, b) => {
-            let aVal = a[currentSort.column];
-            let bVal = b[currentSort.column];
-            if (aVal !== bVal) {
-                return bVal - aVal; // Descending for primary
-            }
-            // Tie-breakers
-            if (currentSort.column === 'podiums') {
-                if (a.victories !== b.victories) return b.victories - a.victories;
-                if (a.fastestLaps !== b.fastestLaps) return b.fastestLaps - a.fastestLaps;
-                return a.nombre.localeCompare(b.nombre);
-            } else if (currentSort.column === 'victories') {
-                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
-                if (a.fastestLaps !== b.fastestLaps) return b.fastestLaps - a.fastestLaps;
-                return a.nombre.localeCompare(b.nombre);
-            } else if (currentSort.column === 'pts') {
-                if (a.victories !== b.victorias) return b.victorias - a.victorias;
-                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
-                return a.nombre.localeCompare(b.nombre);
-            } else if (currentSort.column === 'fastestLaps') {
-                if (a.victories !== b.victorias) return b.victorias - a.victorias;
-                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
-                return a.nombre.localeCompare(b.nombre);
-            } else if (currentSort.column === 'positionsGained') {
-                if (a.victorias !== b.victorias) return b.victorias - a.victorias;
-                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
-                return a.nombre.localeCompare(b.nombre);
-            }
-            return 0;
-        });
-        const body = document.getElementById('stats-body');
-        body.innerHTML = sortedPilotos.map(p => `
-            <tr>
-                <td>${p.nombre}</td>
-                <td>${p.pts}</td>
-                <td>${p.victories}</td>
-                <td>${p.podiums}</td>
-                <td>${p.fastestLaps}</td>
-                <td>${p.positionsGained}</td>
-            </tr>
+        const bodyC = document.getElementById('body-carrera');
+        bodyC.innerHTML = resultados.map((r, i) => `
+            <tr><td>${i+1}º</td><td class="tag">${r.tag}</td><td>${r.nombre} ${r.incs>0?'⚠️':''}</td>
+            <td>${i===0?'LÍDER':'+'+(r.total-resultados[0].total).toFixed(2)+'s'}</td>
+            <td class="${r.nombre===vr_p_nom?'vr':''}">${r.best.toFixed(3)} ${r.nombre===vr_p_nom?'★':''}</td></tr>
         `).join('');
-    }
 
-    function toggleTeamStats() {
-        const section = document.getElementById('team-stats-section');
-        if (section.style.display === 'none' || section.style.display === '') {
-            section.style.display = 'block';
-            actualizarTeamStats();
-        } else {
-            section.style.display = 'none';
-        }
-    }
+        const mundial = [...pilotos].sort((a, b) => b.pts - a.pts);
+        document.getElementById('leader-message').innerText = `Líder: ${mundial[0].nombre} con ${mundial[0].pts} pts`;
+        document.getElementById('body-mundial').innerHTML = mundial.map((p, i) => `
+            <tr><td>${i+1}</td><td>${p.nombre}</td><td><b>${p.pts}</b></td></tr>
+        `).join('');
 
-    function actualizarTeamStats() {
-        const section = document.getElementById('team-stats-section');
-        section.innerHTML = '';
-        const card = document.createElement('div');
-        card.className = 'stats-card';
-        card.innerHTML = `
-            <div class="history-title">ESTADÍSTICAS DE CONSTRUCTORES</div>
-            <select class="sort-select" id="team-sort-select" onchange="sortTeamStats()">
-                <option value="pts">Ordenar por Puntos</option>
-                <option value="victories">Ordenar por Victorias</option>
-                <option value="podiums">Ordenar por Podios</option>
-            </select>
-            <table id="team-stats-table">
-                <thead>
-                    <tr>
-                        <th>Equipo</th>
-                        <th>Puntos</th>
-                        <th>Victorias</th>
-                        <th>Podios</th>
-                    </tr>
-                </thead>
-                <tbody id="team-stats-body">
-                    ${equipos.map(e => `
-                        <tr>
-                            <td>${e.nombre}</td>
-                            <td>${e.pts}</td>
-                            <td>${e.victories}</td>
-                            <td>${e.podiums}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-        section.appendChild(card);
-        document.getElementById('team-sort-select').value = 'pts';
-        updateTeamStatsTable('pts');
-    }
-
-    function sortTeamStats() {
-        const select = document.getElementById('team-sort-select');
-        updateTeamStatsTable(select.value);
-    }
-
-    function updateTeamStatsTable(sortColumn) {
-        const sortedEquipos = [...equipos].sort((a, b) => {
-            let aVal = a[sortColumn];
-            let bVal = b[sortColumn];
-            if (aVal !== bVal) {
-                return bVal - aVal; // Descending for primary
-            }
-            // Tie-breakers
-            if (sortColumn === 'podiums') {
-                if (a.victories !== b.victorias) return b.victorias - a.victorias;
-                if (a.pts !== b.pts) return b.pts - a.pts;
-                return a.nombre.localeCompare(b.nombre);
-            } else if (sortColumn === 'victories') {
-                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
-                if (a.pts !== b.pts) return b.pts - a.pts;
-                return a.nombre.localeCompare(b.nombre);
-            } else if (sortColumn === 'pts') {
-                if (a.victorias !== b.victorias) return b.victorias - a.victorias;
-                if (a.podiums !== b.podiums) return b.podiums - a.podiums;
-                return a.nombre.localeCompare(b.nombre);
-            }
-            return 0;
-        });
-        const body = document.getElementById('team-stats-body');
-        body.innerHTML = sortedEquipos.map(e => `
-            <tr>
-                <td>${e.nombre}</td>
-                <td>${e.pts}</td>
-                <td>${e.victories}</td>
-                <td>${e.podiums}</td>
-            </tr>
+        const tea = [...equipos].sort((a, b) => b.pts - a.pts);
+        document.getElementById('body-equipos').innerHTML = tea.map((e, i) => `
+            <tr><td>${i+1}</td><td>${e.nombre}</td><td><b>${e.pts}</b></td></tr>
         `).join('');
     }
 
     function toggleEvents() {
-    const section = document.getElementById('events-section');
-    if (section.style.display === 'none' || section.style.display === '') {
-        actualizarEvents(); // Actualizamos el contenido antes de mostrar
-        section.style.display = 'block';
-    } else {
-        section.style.display = 'none';
-    }
-}
-
-function actualizarEvents() {
-    const section = document.getElementById('events-section');
-    if (!section) return; // Seguridad
-    
-    section.innerHTML = ''; 
-    const card = document.createElement('div');
-    card.className = 'card'; // Usamos la clase 'card' que ya tienes en tu CSS
-    
-    let html = `<div class="standings-title">LOG DE EVENTOS</div>`;
-    
-    if (eventos.length > 0) {
-        // Mostramos los eventos (los más nuevos primero)
-        html += `<div style="text-align: left; max-height: 400px; overflow-y: auto;">`;
-        for (let i = eventos.length - 1; i >= 0; i--) {
-            html += `<div style="padding: 10px; border-bottom: 1px solid #333; font-size: 0.9rem; color: #eee;">
-                        ${eventos[i]}
-                     </div>`;
+        const sec = document.getElementById('events-section');
+        sec.style.display = sec.style.display === 'block' ? 'none' : 'block';
+        if(sec.style.display === 'block') {
+            sec.innerHTML = `<div class="card"><div class="standings-title">LOG DE COMISARIOS</div>` + 
+                (eventos.length ? eventos.slice().reverse().map(e => `<div style="padding:8px; border-bottom:1px solid #333; font-family:monospace; font-size:0.85rem;">${e}</div>`).join('') : "Sin eventos aún.") + `</div>`;
         }
-        html += `</div>`;
-    } else {
-        html += `<p style="color: #888; padding: 20px;">No hay eventos registrados aún. ¡Simula una ronda!</p>`;
     }
-    
-    card.innerHTML = html;
-    section.appendChild(card);
-}
-</script>
 
+    function toggleHistory() {
+        const sec = document.getElementById('history-section');
+        sec.style.display = sec.style.display === 'block' ? 'none' : 'block';
+        sec.innerHTML = historialCarreras.map(h => `<div class="card"><strong>${h.ronda}</strong> - Ganador: ${h.resultados[0].nombre} | VR: ${h.vr_p_nom}</div>`).join('');
+    }
+
+    function toggleStats() {
+        const sec = document.getElementById('stats-section');
+        sec.style.display = sec.style.display === 'block' ? 'none' : 'block';
+        sec.innerHTML = `<div class="card"><div class="standings-title">STATS TEMPORADA</div><table><thead><tr><th>Piloto</th><th>Vic</th><th>Pod</th><th>VR</th><th>Sanc</th></tr></thead><tbody>` +
+            pilotos.map(p => `<tr><td>${p.nombre}</td><td>${p.victories}</td><td>${p.podiums}</td><td>${p.fastestLaps}</td><td>${p.sanctions}</td></tr>`).join('') +
+            `</tbody></table></div>`;
+    }
+</script>
 </body>
 </html>
 
