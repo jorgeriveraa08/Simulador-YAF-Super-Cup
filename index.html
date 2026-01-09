@@ -538,14 +538,67 @@
             eventos.slice().reverse().map(e => `<div style="padding:10px; border-bottom:1px solid #333; font-size:0.8rem;">${e}</div>`).join('');
     }
 
+    // ... (Mantén los arrays de pilotos y equipos igual)
+
     function renderStats() {
-        document.getElementById('stats-section').innerHTML = `<div style="color:var(--accent); font-weight:bold; margin-bottom:10px;">ESTADÍSTICAS PILOTOS</div>
-        <table><thead><tr><th>Nombre</th><th>Victorias</th><th>Podios</th><th>V.Rápidas</th><th>Sanc.</th></tr></thead>
-        <tbody>${pilotos.map(p => `<tr><td>${p.nombre}</td><td>${p.victories}</td><td>${p.podiums}</td><td>${p.fastestLaps}</td><td>${p.sanctions}</td></tr>`).join('')}</tbody></table>`;
+        const statsSec = document.getElementById('stats-section');
+        // Ordenamos por puntos para que la tabla de stats tenga sentido
+        const pilotosOrdenados = [...pilotos].sort((a, b) => b.pts - a.pts);
+        
+        let html = `<div style="color:var(--accent); font-weight:bold; margin-bottom:10px;">ESTADÍSTICAS ACUMULADAS</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Piloto</th>
+                    <th>Victorias</th>
+                    <th>Podios</th>
+                    <th>V.Rápidas</th>
+                    <th>Sanciones</th>
+                    <th>Puntos</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        
+        pilotosOrdenados.forEach(p => {
+            html += `
+                <tr>
+                    <td>${p.nombre}</td>
+                    <td style="text-align:center">${p.victories}</td>
+                    <td style="text-align:center">${p.podiums}</td>
+                    <td style="text-align:center">${p.fastestLaps}</td>
+                    <td style="text-align:center; color:${p.sanctions > 0 ? 'var(--accent)' : 'inherit'}">${p.sanctions}</td>
+                    <td><b>${p.pts}</b></td>
+                </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        statsSec.innerHTML = html;
+    }
+
+    // Asegúrate de que la función toggleSection llame correctamente a renderStats:
+    function toggleSection(id) {
+        const sections = ['events-section', 'history-section', 'stats-section'];
+        sections.forEach(s => {
+            const el = document.getElementById(s);
+            if (s === id) {
+                // Si la sección está oculta, la mostramos y cargamos los datos
+                if (el.style.display === 'none' || el.style.display === '') {
+                    el.style.display = 'block';
+                    if (id === 'history-section') renderHistory();
+                    if (id === 'stats-section') renderStats(); // <--- Esta es la clave
+                    if (id === 'events-section') renderEvents();
+                } else {
+                    el.style.display = 'none';
+                }
+            } else {
+                el.style.display = 'none';
+            }
+        });
     }
 </script>
 </body>
 </html>
+
 
 
 
