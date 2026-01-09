@@ -936,32 +936,45 @@ function simularSiguienteRonda() {
     }
 
     function toggleEvents() {
-        const section = document.getElementById('events-section');
-        if (section.style.display === 'none' || section.style.display === '') {
-            section.style.display = 'block';
-            actualizarEvents();
-        } else {
-            section.style.display = 'none';
-        }
+    const section = document.getElementById('events-section');
+    if (section.style.display === 'none' || section.style.display === '') {
+        actualizarEvents(); // Actualizamos el contenido antes de mostrar
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
     }
+}
 
-    function actualizarEvents() {
-        const section = document.getElementById('events-section');
-        section.innerHTML = '';
-        const card = document.createElement('div');
-        card.className = 'events-card';
-        card.innerHTML = `
-            <div class="history-title">EVENTOS</div>
-            <div>
-                ${eventos.length > 0 ? eventos.map(e => `<div class="event-item">${e}</div>`).join('') : '<p>No hay eventos registrados.</p>'}
+function actualizarEvents() {
+    const section = document.getElementById('events-section');
+    section.innerHTML = ''; // Limpiamos para evitar duplicados
+    
+    const card = document.createElement('div');
+    card.className = 'events-card';
+    
+    // Generamos el contenido: si no hay eventos, ponemos un aviso
+    let contenidoEventos = `<div class="history-title">LOG DE CARRERA Y COMISARIOS</div>`;
+    
+    if (eventos.length > 0) {
+        // Usamos reverse() para que los eventos más recientes salgan arriba
+        const listaEventos = [...eventos].reverse().map(e => `
+            <div class="event-item" style="padding: 8px; border-bottom: 1px solid #444; font-family: monospace; font-size: 0.85rem;">
+                ${e}
             </div>
-        `;
-        section.appendChild(card);
+        `).join('');
+        contenidoEventos += `<div>${listaEventos}</div>`;
+    } else {
+        contenidoEventos += `<p style="padding: 20px; text-align: center; color: #888;">No hay eventos registrados en la temporada aún.</p>`;
     }
+    
+    card.innerHTML = contenidoEventos;
+    section.appendChild(card);
+}
 </script>
 
 </body>
 </html>
+
 
 
 
