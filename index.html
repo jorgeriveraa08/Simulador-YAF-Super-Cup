@@ -389,7 +389,7 @@
         {"nombre": "Caesaravgvsta", "tag": "CV", pts: 0, victories: 0, podiums: 0}
     ];
 
-    let eventos = []; // Array to store events
+    let eventos = []; // Debe estar fuera de cualquier función
 
     let rondaActual = 0;
     let ordenSalida = ["J.Arias", "P.Rivera", "J.Aguado", "J.Goula", "P.Aldea", "G.Alonso", "A.Hernández", "N.Bosqued", "J.Chueca", "J.Rivera", "R.Navarro", "S.Rubio"];
@@ -548,6 +548,7 @@ function simularSiguienteRonda() {
     });
 
     // --- LÓGICA DE EVENTOS Y SANCIONES ---
+    // --- PROCESAMIENTO DE EVENTOS (Copia esto tal cual) ---
     let implicados = resultados.filter(r => r.incs > 0);
 
     if (implicados.length >= 2) {
@@ -567,10 +568,12 @@ function simularSiguienteRonda() {
         const sanctionTime = Math.round((Math.random() * 10 + 5) / 5) * 5; 
         culpable.total += sanctionTime; 
 
+        // ESTA LÍNEA ES CLAVE: Guarda el evento en el array global
         eventos.push(`${ronda}: COLISIÓN (${nombresImplicados}). ${culpable.nombre} sancionado con +${sanctionTime}s.`);
     } 
     else if (implicados.length === 1) {
         const solo = implicados[0];
+        // ESTA LÍNEA ES CLAVE: Guarda el error individual
         eventos.push(`${ronda}: ${solo.nombre} cometió un error individual y perdió ${solo.tiempoPerdidoIncs.toFixed(2)}s.`);
     }
 
@@ -947,33 +950,35 @@ function simularSiguienteRonda() {
 
 function actualizarEvents() {
     const section = document.getElementById('events-section');
-    section.innerHTML = ''; // Limpiamos para evitar duplicados
+    if (!section) return; // Seguridad
     
+    section.innerHTML = ''; 
     const card = document.createElement('div');
-    card.className = 'events-card';
+    card.className = 'card'; // Usamos la clase 'card' que ya tienes en tu CSS
     
-    // Generamos el contenido: si no hay eventos, ponemos un aviso
-    let contenidoEventos = `<div class="history-title">LOG DE CARRERA Y COMISARIOS</div>`;
+    let html = `<div class="standings-title">LOG DE EVENTOS</div>`;
     
     if (eventos.length > 0) {
-        // Usamos reverse() para que los eventos más recientes salgan arriba
-        const listaEventos = [...eventos].reverse().map(e => `
-            <div class="event-item" style="padding: 8px; border-bottom: 1px solid #444; font-family: monospace; font-size: 0.85rem;">
-                ${e}
-            </div>
-        `).join('');
-        contenidoEventos += `<div>${listaEventos}</div>`;
+        // Mostramos los eventos (los más nuevos primero)
+        html += `<div style="text-align: left; max-height: 400px; overflow-y: auto;">`;
+        for (let i = eventos.length - 1; i >= 0; i--) {
+            html += `<div style="padding: 10px; border-bottom: 1px solid #333; font-size: 0.9rem; color: #eee;">
+                        ${eventos[i]}
+                     </div>`;
+        }
+        html += `</div>`;
     } else {
-        contenidoEventos += `<p style="padding: 20px; text-align: center; color: #888;">No hay eventos registrados en la temporada aún.</p>`;
+        html += `<p style="color: #888; padding: 20px;">No hay eventos registrados aún. ¡Simula una ronda!</p>`;
     }
     
-    card.innerHTML = contenidoEventos;
+    card.innerHTML = html;
     section.appendChild(card);
 }
 </script>
 
 </body>
 </html>
+
 
 
 
