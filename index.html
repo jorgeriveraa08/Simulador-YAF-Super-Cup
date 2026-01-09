@@ -430,7 +430,18 @@
                 
                 let std = p.cons === "pro" ? 0.08 : 0.40;
                 
-                let v_raw = gaussRandom(t_base + (p.peso - 65) * 0.008, std);
+                // Influence of weight on lap time.
+                // Default factor 0.008; reduce it for N.Bosqued so peso casi no influye.
+                const defaultWeightFactor = 0.002;
+                const reducedWeightFactorForNB = 0.008; // casi nulo
+                const weightFactor = (p.nombre === "N.Bosqued") ? reducedWeightFactorForNB : defaultWeightFactor;
+                let v_raw = gaussRandom(t_base + (p.peso - 65) * weightFactor, std);
+                
+                // Penalización leve por vuelta para G.Alonso (es un poco peor que el resto de pros)
+                if (p.nombre === "G.Alonso") {
+                    const penaltyPerLap = 0.05; // ajustar si quieres más/menos diferencia
+                    v_raw += penaltyPerLap;
+                }
                 
                 let suelo;
                 if (p.cons === "pro") suelo = 41.3;
@@ -535,7 +546,14 @@
         const bodyCarrera = document.getElementById('body-carrera');
         bodyCarrera.innerHTML = "";
         resultados.forEach((r, idx) => {
-            const gap = idx === 0 ? "LÍDER" : `+${(r.total - resultados[0].total).toFixed(2)}s`;
+            let gap = "";
+            if (idx === 0) {
+                gap = "LÍDER";
+            } else {
+                const gapToPrevious = (r.total - resultados[idx - 1].total).toFixed(2);
+                const gapToLeader = (r.total - resultados[0].total).toFixed(2);
+                gap = `+${gapToPrevious}s (+${gapToLeader}s)`;
+            }
             const vrStyle = r.nombre === vr_p_nom ? "color: #00ff41; font-weight: bold;" : "";
             const row = `<tr>
                 <td class="pos">${idx + 1}º</td>
@@ -624,7 +642,14 @@
                         </thead>
                         <tbody>
                             ${hist.resultados.map((r, pos) => {
-                                const gap = pos === 0 ? "LÍDER" : `+${(r.total - hist.resultados[0].total).toFixed(2)}s`;
+                                let gap = "";
+                                if (pos === 0) {
+                                    gap = "LÍDER";
+                                } else {
+                                    const gapToPrevious = (r.total - hist.resultados[pos - 1].total).toFixed(2);
+                                    const gapToLeader = (r.total - hist.resultados[0].total).toFixed(2);
+                                    gap = `+${gapToPrevious}s (+${gapToLeader}s)`;
+                                }
                                 const vrStyle = r.nombre === hist.vr_p_nom ? "color: #00ff41; font-weight: bold;" : "";
                                 return `<tr>
                                     <td class="pos">${pos + 1}º</td>
@@ -811,7 +836,7 @@
             }
             // Tie-breakers
             if (sortColumn === 'podiums') {
-                if (a.victories !== b.victories) return b.victories - a.victories;
+                if (a.victories !== b.victorias) return b.victorias - a.victorias;
                 if (a.pts !== b.pts) return b.pts - a.pts;
                 return a.nombre.localeCompare(b.nombre);
             } else if (sortColumn === 'victories') {
@@ -819,7 +844,7 @@
                 if (a.pts !== b.pts) return b.pts - a.pts;
                 return a.nombre.localeCompare(b.nombre);
             } else if (sortColumn === 'pts') {
-                if (a.victories !== b.victorias) return b.victorias - a.victorias;
+                if (a.victorias !== b.victorias) return b.victorias - a.victorias;
                 if (a.podiums !== b.podiums) return b.podiums - a.podiums;
                 return a.nombre.localeCompare(b.nombre);
             }
