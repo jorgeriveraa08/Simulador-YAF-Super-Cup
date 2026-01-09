@@ -488,24 +488,56 @@
         });
 
         // After calculating results, add events
-        resultados.forEach(r => {
-            if (r.incs > 0) {
-                const pOriginal = pilotos.find(p => p.nombre === r.nombre);
-                pOriginal.accidents += r.incs;
-                // Calculate total accident time penalty
-                let totalAccidentTime = 0;
-                for (let i = 0; i < r.incs; i++) {
-                    totalAccidentTime += Math.random() * 3 + 2;
-                }
-                eventos.push(`${ronda}: ${r.nombre} tuvo ${r.incs} accidente(s), penalización total de ${totalAccidentTime.toFixed(2)}s.`);
-                if (Math.random() < 0.3) { // 30% chance of sanction per incident
-                    pOriginal.sanctions += 1;
-                    const sanctionTime = Math.round((Math.random() * 10 + 5) / 5) * 5; // 5, 10, 15 seconds in 5s increments
-                    r.total += sanctionTime; // Apply penalty to total time
-                    eventos.push(`${ronda}: ${r.nombre} recibió una sanción, penalización de ${sanctionTime.toFixed(2)}s.`);
-                }
-            }
-        });
+        // --- LÓGICA DE COLISIONES Y SANCIONES ACTUALIZADA ---
+
+// 1. Identificar quiénes han tenido incidentes en esta ronda
+let implicados = resultados.filter(r => r.incs > 0);
+
+if (implicados.length >= 2) {
+    // Creamos el texto de la colisión mencionando a los pilotos
+    const nombresImplicados = implicados.map(p => p.nombre).join(", ");
+    const etiquetaColision = `COLISIÓN (${nombresImplicados})`;
+
+    // Cálculo de culpabilidad basado en p_col (agresividad)
+    let agresividadTotal = implicados.reduce((sum, p) => sum + p.p_col, 0);
+    let ticketGanador = Math.random() * agresividadTotal;
+    let acumulado = 0;
+    let culpable = implicados[0];
+
+    for (let p of implicados) {
+        acumulado += p.p_col;
+        if (ticketGanador <= acumulado) {
+            culpable = p;
+            break;
+        }
+    }
+
+    const pOriginal = pilotos.find(p => p.nombre === culpable.nombre);
+
+    // Aplicar sanción solo al culpable
+    pOriginal.sanctions += 1;
+    const sanctionTime = Math.round((Math.random() * 10 + 5) / 5) * 5; 
+    culpable.total += sanctionTime; 
+
+    // Guardar el evento con el formato solicitado
+    eventos.push(`${ronda}: ${etiquetaColision}. ${culpable.nombre} es sancionado con +${sanctionTime}s por provocar el incidente.`);
+}
+
+// 2. Registro de estadísticas y errores individuales
+resultados.forEach(r => {
+    if (r.incs > 0) {
+        const pOriginal = pilotos.find(p => p.nombre === r.nombre);
+        pOriginal.accidents += r.incs;
+        
+        // Si solo hubo uno, es un error de pilotaje normal (sin sanción)
+        if (implicados.length === 1) {
+            eventos.push(`${ronda}: ${r.nombre} cometió un error individual (salida de pista).`);
+        }
+    }
+});
+
+// Re-ordenar la tabla final tras aplicar sanciones de tiempo
+resultados.sort((a, b) => a.total - b.total);;
 
         // Re-sort after penalties
         resultados.sort((a, b) => a.total - b.total);
