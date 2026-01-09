@@ -491,6 +491,9 @@
         // --- LÓGICA DE COLISIONES Y SANCIONES ACTUALIZADA ---
 
 // 1. Identificar quiénes han tenido incidentes en esta ronda
+// --- LÓGICA DE COLISIONES Y SANCIONES ACTUALIZADA ---
+
+// 1. Identificar quiénes han tenido incidentes en esta ronda
 let implicados = resultados.filter(r => r.incs > 0);
 
 if (implicados.length >= 2) {
@@ -522,6 +525,22 @@ if (implicados.length >= 2) {
     // Guardar el evento con el formato solicitado
     eventos.push(`${ronda}: ${etiquetaColision}. ${culpable.nombre} es sancionado con +${sanctionTime}s por provocar el incidente.`);
 }
+
+// 2. Registro de estadísticas y errores individuales
+resultados.forEach(r => {
+    if (r.incs > 0) {
+        const pOriginal = pilotos.find(p => p.nombre === r.nombre);
+        pOriginal.accidents += r.incs;
+        
+        // Si solo hubo uno, es un error de pilotaje normal (sin sanción)
+        if (implicados.length === 1) {
+            eventos.push(`${ronda}: ${r.nombre} cometió un error individual (salida de pista).`);
+        }
+    }
+});
+
+// Re-ordenar la tabla final tras aplicar sanciones de tiempo
+resultados.sort((a, b) => a.total - b.total);
 
 // 2. Registro de estadísticas y errores individuales
 resultados.forEach(r => {
